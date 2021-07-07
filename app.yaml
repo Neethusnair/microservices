@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: login-deployment
+  labels:
+    app: login
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: login
+  template:
+    metadata:
+      labels: # labels to select/identify the deployment
+        app: login  
+#       annotations: 
+#         date: "+%H:%M:%S %d/%m/%y"
+    spec:     # pod spec
+      imagePullSecrets:
+      - name: jfrog-secret
+      containers: 
+      - name: login
+        #image: neethusnair/login-docker:latest # image we pushed
+        image: sreyo.jfrog.io/ns-docker-dev-local/login-docker:latest # image we pushed
+        
+        #imagePullPolicy: Never
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: MONGO_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: mongo-root-username
+        - name: MONGO_PASSWORD
+          valueFrom: 
+            secretKeyRef:
+              name: secret
+              key: mongo-root-password
+        - name: ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: auth-token      
+        - name: MONGO_HOSTNAME
+          valueFrom: 
+            configMapKeyRef:
+              name: app-configmap
+              key: database_hostname
+        - name: MONGO_PORT
+          valueFrom: 
+            configMapKeyRef:
+              name: app-configmap
+              key: database_port
+        - name: MONGO_DB
+          valueFrom: 
+            configMapKeyRef:
+              name: app-configmap
+              key: database_db
+        #- name: HOSTNAME
+          #valueFrom: 
+            #configMapKeyRef:
+              #name: app-configmap
+              #key: list_hostname
+        - name: PORT
+          valueFrom: 
+            configMapKeyRef:
+              name: app-configmap
+              key: list_port       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: login-service
+  labels:
+    app: login
+spec:
+  selector:
+    app: login 
+  ports:
+    - port: 3000
+      targetPort: 3000

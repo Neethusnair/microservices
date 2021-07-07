@@ -1,0 +1,200 @@
+name: Deploy app to GKE
+
+on:
+  push:
+    branches:
+    - main
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER: new-gke
+  GKE_ZONE: us-central1-a
+
+jobs:
+  Job1:
+    name: Setup and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Setup gcloud CLI
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+        service_account_key: ${{ secrets.GKE_SA_KEY }}
+        project_id: ${{ secrets.GKE_PROJECT }}
+
+    # Configure Docker to use the gcloud command-line tool as a credential helper for authentication
+    - run: |-
+        gcloud --quiet auth configure-docker
+    # Get the GKE credentials so we can deploy to the cluster
+    - run: |-
+        gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
+        
+   
+   # Set up istio
+    - name: Set up Istio
+      run: |-
+       curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.3 sh -
+       cd istio-1.7.3
+       export PATH=$PWD/bin:$PATH
+       istioctl install --set profile=demo
+       cd ~
+       #kubectl label namespace default istio-injection=enabled 
+       kubectl label namespace default istio-injection=enabled --overwrite
+
+
+              
+    # Login to Jfrog
+    - name: Jfrog login
+      env:
+        JFROG_USER: ${{ secrets.JFROG_USER }}
+        JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
+      run: |
+          docker login sreyo.jfrog.io -u $JFROG_USER -p $JFROG_PASSWORD
+          kubectl delete secret jfrog-secret --ignore-not-found 
+          kubectl create secret generic jfrog-secret --from-file=.dockerconfigjson=/home/runner/.docker/config.json  --type=kubernetes.io/dockerconfigjson
+    
+       
+    # Set up kustomize
+    - name: Set up Kustomize
+      run: |-
+        curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
+        chmod u+x ./kustomize
+   
+   # Deploy mongo to the GKE cluster
+    - name: Deploy Mongo
+      run: |-
+        ./kustomize build . | kubectl apply -f -
+        kubectl wait --for=condition=ready pod -l app=mongodb
+        kubectl rollout status deployment mongodb-deployment
+        #kubectl get services -o wide
+        
+    # Deploy docorized app image to the GKE cluster
+    - name: Deploy Login 
+      run: |-
+        kubectl apply -f app-config.yaml 
+        #kubectl rollout restart deploy login-deployment --for=condition=ready pod -l app=login
+        #kubectl rollout restart deploy login-deployment --ignore-not-found 
+        #kubectl delete deploy login-deployment --ignore-not-found
+        #kubectl restart deploy login-deployment --ignore-not-found
+        #kubectl delete deploy login-deployment --ignore-not-found 
+        #kubectl delete service login-service --ignore-not-found 
+        #kubectl create -f app.yaml
+        kubectl apply -f app.yaml
+        kubectl wait --timeout=90s --for=condition=ready pod -l app=login
+        #kubectl rollout restart deploy login-deployment
+        kubectl rollout status deployment login-deployment
+        #kubectl get services -o wide
+   
+   #deploy welcome image    
+    - name: Deploy List
+      run: |-
+        kubectl apply -f welcome.yaml
+        kubectl wait --timeout=90s --for=condition=ready pod -l app=list
+        kubectl rollout status deployment list-deployment
+        #kubectl get services -o wide 
+        
+   #deploy gateway and virtual services
+    - name: Deploy gateway
+      run: |-
+        kubectl apply -f gateway.yaml
+        kubectl get svc -l=istio=ingressgateway -n istio-system
+        kubectl apply -f gateway.yaml
+        kubectl apply -f vs-login.yaml
+        kubectl apply -f vs-list.yaml
+        
+  #deploy ingress    
+    #- name: Deploy Ingress 
+      #run: |-
+        #kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.45.0/deploy/static/provider/cloud/deploy.yaml
+        #kubectl wait --namespace ingress-nginx \
+           #--for=condition=ready pod \
+           #--selector=app.kubernetes.io/component=controller \
+           #--timeout=90s
+        #kubectl apply -f my-ingress.yaml
+        ##kubectl get ingress    
+        #kubectl get svc ingress-nginx-controller -n ingress-nginx
+        
+  Job2:
+    needs: Job1
+    name: Create subdomain in Cloudflare
+    runs-on: ubuntu-latest    
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+      
+    ## Setup gcloud CLI
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+        service_account_key: ${{ secrets.GKE_SA_KEY }}
+        project_id: ${{ secrets.GKE_PROJECT }}
+
+    # Configure Docker to use the gcloud command-line tool as a credential helper for authentication
+    - run: |-
+        gcloud --quiet auth configure-docker
+    # Get the GKE credentials so we can deploy to the cluster
+    - run: |-
+        gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
+      
+    - name: Update CloudFlare DNS with Cluster IP 
+      run: |-
+        # purge any existing records for our GCP subdomain.
+        #existing_records=( $(curl -X GET "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_DNS_ZONE }}/dns_records?type=A&name=${{ github.head_ref }}.sreyo.in" \
+        existing_records=( $(curl -X GET "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_DNS_ZONE }}/dns_records?type=A&name=ns.sreyo.in" \
+           -H "X-Auth-Email: ${{ secrets.CLOUDFLARE_EMAIL }}" \
+           -H "X-Auth-Key: ${{ secrets.CLOUDFLARE_API_KEY }}" \
+           -H "Content-Type: application/json"   | jq -r '.result[].id') )
+        for record in ${existing_records[@]}; do
+          curl -X DELETE "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_DNS_ZONE }}/dns_records/${record}" \
+             -H "X-Auth-Email: ${{ secrets.CLOUDFLARE_EMAIL }}" \
+             -H "X-Auth-Key: ${{ secrets.CLOUDFLARE_API_KEY }}" \
+             -H "Content-Type: application/json"
+        done
+      
+        # Create new record with latest cluster IP.
+        CLUSTER_IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_DNS_ZONE }}/dns_records" \
+           -H "X-Auth-Email: ${{ secrets.CLOUDFLARE_EMAIL }}" \
+           -H "X-Auth-Key: ${{ secrets.CLOUDFLARE_API_KEY }}" \
+           -H "Content-Type: application/json" \
+           --data '{"type":"A","name":"ns","content":"'${CLUSTER_IP}'","ttl":120,"priority":10,"proxied":true}'
+           #--data '{"type":"A","name":"${{ github.head_ref }}","content":"'${CLUSTER_IP}'","ttl":120,"priority":10,"proxied":true}'
+
+  Job3:
+    needs: Job2
+    name: Newman Testing
+    runs-on: ubuntu-latest    
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Install node
+      uses: actions/setup-node@v1
+        
+    # Runs a set of commands using the runners shell      
+    - name: Install Newman
+      run: |
+        npm install -g newman
+        npm install -g newman-reporter-htmlextra
+     
+    - name: Make dir for test result
+      run: mkdir Results
+        
+    - name: Run Collection  
+      run: newman run ./Postman_Collections/Cluster_IP.json
+
+    - name: Output Run Details
+      uses: actions/upload-artifact@v2
+      with:
+        name: RunReports
+        path: Results  
+ 
+ 
+ 

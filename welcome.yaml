@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: list-deployment
+  labels:
+    app: list
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: list
+  template:
+    metadata:
+      labels: # labels to select/identify the deployment
+        app: list
+    spec:     # pod spec                  
+      imagePullSecrets:
+      - name: jfrog-secret
+      containers: 
+      - name: list
+        #image: neethusnair/login-docker:latest # image we pushed
+        image: sreyo.jfrog.io/ns-docker-dev-local/list-docker # image we pushed
+        #imagePullPolicy: Never
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4000
+        env:
+        - name: MONGO_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: mongo-root-username
+        - name: MONGO_PASSWORD
+          valueFrom: 
+            secretKeyRef:
+              name: secret
+              key: mongo-root-password 
+        - name: ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: auth-token       
+        - name: MONGO_HOSTNAME
+          valueFrom: 
+            configMapKeyRef:
+              name: app-configmap
+              key: database_hostname
+        - name: MONGO_PORT
+          valueFrom: 
+            configMapKeyRef:
+              name: app-configmap
+              key: database_port
+        - name: MONGO_DB
+          valueFrom: 
+            configMapKeyRef:
+              name: app-configmap
+              key: database_db      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: list-service
+spec:
+  selector:
+    app: list 
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: 4000
+

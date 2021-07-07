@@ -1,0 +1,33 @@
+name: "Create Image"
+
+on:
+  pull_request:
+    branches:
+      - main
+      
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Push
+    runs-on: ubuntu-latest 
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    # Login to Jfrog
+    - name: Jfrog login
+      env:
+        JFROG_USER: ${{ secrets.JFROG_USER }}
+        JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
+      run: |
+          docker login sreyo.jfrog.io -u $JFROG_USER -p $JFROG_PASSWORD
+          #kubectl create secret generic jfrog-secret --from-file=.dockerconfigjson=.docker/config.json  --type=kubernetes.io/dockerconfigjson
+          #kubectl create secret generic jfrog-secret --from-file=.dockerconfigjson=/home/runner/.docker/config.json  --type=kubernetes.io/dockerconfigjson
+    
+    # Build the Docker image
+    - name: Build docker image
+      run: |-
+        docker build ./authentication  -t  sreyo.jfrog.io/ns-docker-dev-local/login-docker:latest
+        docker build ./welcome -t  sreyo.jfrog.io/ns-docker-dev-local/list-docker
+        docker push sreyo.jfrog.io/ns-docker-dev-local/login-docker
+        docker push sreyo.jfrog.io/ns-docker-dev-local/list-docker  
