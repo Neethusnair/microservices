@@ -1,0 +1,90 @@
+{
+  "info": {
+    "_postman_id": "fdc0596b-c3bb-4177-85ac-70c432eef707",
+    "name": "QA Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "b8c73ffc-f5af-4428-baa8-1b818631e764",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "_postman_id": "fed41a1d-8191-443b-abb6-4fe42fa0e6d6",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://nsqa.sreyo.in"
+      },
+      "response": []
+    },
+    {
+      "name": "GET Register",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "7de04f53-7cc0-4b6e-a6fb-1b92c82d8853",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "_postman_id": "197baf4e-8c47-4835-bac1-00cdd06f5c2a",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://nsqa.sreyo.in/register"
+      },
+      "response": []
+    },
+    {
+      "name": "GET List",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "e9b73724-8977-4ba1-a076-94608bb5b5e1",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "_postman_id": "6a528eda-1d69-42d0-a701-d1aefd5c258b",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://nsqa.sreyo.in/welcome/lists"
+      },
+      "response": []
+    }
+  ]
+}
