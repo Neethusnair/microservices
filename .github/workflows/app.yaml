@@ -35,16 +35,16 @@ jobs:
         gcloud container clusters get-credentials "$GKE_CLUSTER1" --zone "$GKE_ZONE"
         
    
-   # Set up istio
-    - name: Set up Istio
-      run: |-
-       curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.3 sh -
-       cd istio-1.7.3
-       export PATH=$PWD/bin:$PATH
-       istioctl install --set profile=demo
-       cd ~
-       #kubectl label namespace default istio-injection=enabled 
-       kubectl label namespace default istio-injection=enabled --overwrite
+#    # Set up istio
+#     - name: Set up Istio
+#       run: |-
+#        curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.3 sh -
+#        cd istio-1.7.3
+#        export PATH=$PWD/bin:$PATH
+#        istioctl install --set profile=demo
+#        cd ~
+#        #kubectl label namespace default istio-injection=enabled 
+#        kubectl label namespace default istio-injection=enabled --overwrite
 
 
               
@@ -200,16 +200,16 @@ jobs:
         gcloud container clusters get-credentials "$GKE_CLUSTER2" --zone "$GKE_ZONE"
         
    
-   # Set up istio
-    - name: Set up Istio
-      run: |-
-       curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.3 sh -
-       cd istio-1.7.3
-       export PATH=$PWD/bin:$PATH
-       istioctl install --set profile=demo
-       cd ~
-       #kubectl label namespace default istio-injection=enabled 
-       kubectl label namespace default istio-injection=enabled --overwrite
+#    # Set up istio
+#     - name: Set up Istio
+#       run: |-
+#        curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.3 sh -
+#        cd istio-1.7.3
+#        export PATH=$PWD/bin:$PATH
+#        istioctl install --set profile=demo
+#        cd ~
+#        #kubectl label namespace default istio-injection=enabled 
+#        kubectl label namespace default istio-injection=enabled --overwrite
               
     # Login to Jfrog
     - name: Jfrog login
