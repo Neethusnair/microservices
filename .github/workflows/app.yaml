@@ -34,19 +34,6 @@ jobs:
     - run: |-
         gcloud container clusters get-credentials "$GKE_CLUSTER1" --zone "$GKE_ZONE"
         
-   
-#    # Set up istio
-#     - name: Set up Istio
-#       run: |-
-#        curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.3 sh -
-#        cd istio-1.7.3
-#        export PATH=$PWD/bin:$PATH
-#        istioctl install --set profile=demo
-#        cd ~
-#        #kubectl label namespace default istio-injection=enabled 
-#        kubectl label namespace default istio-injection=enabled --overwrite
-
-
               
     # Login to Jfrog
     - name: Jfrog login
@@ -169,6 +156,32 @@ jobs:
         
     - name: Run Collection  
       run: newman run ./Postman_Collections/DEV_Collections.json
+      
+#     - name: Rollback Release
+#         #if: failure()
+#         run: |-  
+#           # roll back image in jfrog
+          
+#     # may or maynot need below line of codes
+#     # Setup gcloud CLI
+#     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+#       with:
+#         version: '290.0.1'
+#         service_account_key: ${{ secrets.GKE_SA_KEY }}
+#         project_id: ${{ secrets.GKE_PROJECT }}
+
+#     # Configure Docker to use the gcloud command-line tool as a credential helper for authentication
+#     - run: |-
+#         gcloud --quiet auth configure-docker
+#     # Get the GKE credentials so we can deploy to the cluster
+#     - run: |-
+#         gcloud container clusters get-credentials "$GKE_CLUSTER1" --zone "$GKE_ZONE"
+     
+#     # restart deployment
+#     - name: Deploy Login 
+#       run: |-
+#         kubectl rollout restart deploy login-deployment
+
 
     - name: Output Run Details
       uses: actions/upload-artifact@v2
@@ -199,17 +212,6 @@ jobs:
     - run: |-
         gcloud container clusters get-credentials "$GKE_CLUSTER2" --zone "$GKE_ZONE"
         
-   
-#    # Set up istio
-#     - name: Set up Istio
-#       run: |-
-#        curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.3 sh -
-#        cd istio-1.7.3
-#        export PATH=$PWD/bin:$PATH
-#        istioctl install --set profile=demo
-#        cd ~
-#        #kubectl label namespace default istio-injection=enabled 
-#        kubectl label namespace default istio-injection=enabled --overwrite
               
     # Login to Jfrog
     - name: Jfrog login
