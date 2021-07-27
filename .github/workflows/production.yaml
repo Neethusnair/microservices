@@ -1,4 +1,4 @@
-name: Production
+name: Deploy to Prod
 
 on:
   workflow_dispatch
@@ -35,7 +35,7 @@ jobs:
         docker push sreyo.jfrog.io/ns-docker-prod-local/login-docker
         docker push sreyo.jfrog.io/ns-docker-prod-local/list-docker  
   
-  Job2:
+ Job2:
     needs: Job1
     name: Setup and Deploy
     runs-on: ubuntu-latest
