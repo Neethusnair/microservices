@@ -1,0 +1,98 @@
+name: Deploy app to GKE Production
+
+on:
+  workflow_dispatch
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER3: prod-gke
+  GKE_ZONE: us-central1-a
+
+jobs:
+ Job1:
+  setup-build-publish-deploy:
+    name: Setup, Build, Push
+    runs-on: ubuntu-latest 
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    # Login to Jfrog
+    - name: Jfrog login
+      env:
+        JFROG_USER: ${{ secrets.JFROG_USER }}
+        JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
+      run: |
+          docker login sreyo.jfrog.io -u $JFROG_USER -p $JFROG_PASSWORD
+          #kubectl create secret generic jfrog-secret --from-file=.dockerconfigjson=.docker/config.json  --type=kubernetes.io/dockerconfigjson
+          #kubectl create secret generic jfrog-secret --from-file=.dockerconfigjson=/home/runner/.docker/config.json  --type=kubernetes.io/dockerconfigjson
+    
+    # Build the Docker image
+    - name: Build docker image
+      run: |-
+        docker build ./authentication  -t  sreyo.jfrog.io/ns-docker-prod-local/login-docker:latest
+        docker build ./welcome -t  sreyo.jfrog.io/ns-docker-prod-local/list-docker
+        docker push sreyo.jfrog.io/ns-docker-prod-local/login-docker
+        docker push sreyo.jfrog.io/ns-docker-prod-local/list-docker  
+  
+  Job2:
+    needs: Job1
+    name: Setup and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Setup gcloud CLI
+    - uses: google-github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+        service_account_key: ${{ secrets.GKE_SA_KEY }}
+        project_id: ${{ secrets.GKE_PROJECT }}
+
+    # Configure Docker to use the gcloud command-line tool as a credential helper for authentication
+    - run: |-
+        gcloud --quiet auth configure-docker
+    # Get the GKE credentials so we can deploy to the cluster
+    - run: |-
+        gcloud container clusters get-credentials "$GKE_CLUSTER3" --zone "$GKE_ZONE"
+        
+              
+    # Login to Jfrog
+    - name: Jfrog login
+      env:
+        JFROG_USER: ${{ secrets.JFROG_USER }}
+        JFROG_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
+      run: |
+          docker login sreyo.jfrog.io -u $JFROG_USER -p $JFROG_PASSWORD
+          kubectl delete secret jfrog-secret --ignore-not-found 
+          kubectl create secret generic jfrog-secret --from-file=.dockerconfigjson=/home/runner/.docker/config.json  --type=kubernetes.io/dockerconfigjson
+          
+        
+    # Deploy docorized app image to the GKE cluster
+    - name: Deploy Login 
+      run: |-
+        kubectl apply -f secret.yaml
+        kubectl apply -f app-config.yaml 
+        kubectl apply -f app.yaml
+        kubectl wait --timeout=90s --for=condition=ready pod -l app=login
+        kubectl rollout restart deploy login-deployment
+        kubectl rollout status deployment login-deployment
+   
+   #deploy welcome image    
+    - name: Deploy List
+      run: |-
+        kubectl apply -f welcome.yaml
+        kubectl wait --timeout=90s --for=condition=ready pod -l app=list
+        kubectl rollout status deployment list-deployment
+        
+   #deploy gateway and virtual services
+    - name: Deploy gateway
+      run: |-
+        kubectl apply -f gateway.yaml
+        kubectl get svc -l=istio=ingressgateway -n istio-system
+        kubectl apply -f gateway.yaml
+        kubectl apply -f vs-login.yaml
+        kubectl apply -f vs-list.yaml
