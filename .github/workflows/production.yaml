@@ -76,17 +76,17 @@ jobs:
       run: |-
         kubectl apply -f secret.yaml
         kubectl apply -f app-config.yaml 
-        kubectl apply -f app.yaml
+        kubectl apply -f app2.yaml
         kubectl wait --timeout=90s --for=condition=ready pod -l app=login
-        kubectl rollout restart deploy login-deployment
-        kubectl rollout status deployment login-deployment
+        kubectl rollout restart deploy login-prod-deployment
+        kubectl rollout status deployment login-prod-deployment
    
    #deploy welcome image    
     - name: Deploy List
       run: |-
-        kubectl apply -f welcome.yaml
+        kubectl apply -f welcome2.yaml
         kubectl wait --timeout=90s --for=condition=ready pod -l app=list
-        kubectl rollout status deployment list-deployment
+        kubectl rollout status deployment list-prod-deployment
         
    #deploy gateway and virtual services
     - name: Deploy gateway
