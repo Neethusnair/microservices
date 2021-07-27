@@ -66,7 +66,7 @@ jobs:
         kubectl apply -f app-config.yaml 
         kubectl apply -f app.yaml
         kubectl wait --timeout=90s --for=condition=ready pod -l app=login
-        #kubectl rollout restart deploy login-deployment
+        kubectl rollout restart deploy login-deployment
         kubectl rollout status deployment login-deployment
    
    #deploy welcome image    
@@ -245,7 +245,7 @@ jobs:
         kubectl apply -f app-config.yaml 
         kubectl apply -f app.yaml
         kubectl wait --timeout=90s --for=condition=ready pod -l app=login
-        #kubectl rollout restart deploy login-deployment
+        kubectl rollout restart deploy login-deployment
         kubectl rollout status deployment login-deployment
    
    #deploy welcome image    
@@ -398,7 +398,7 @@ jobs:
         kubectl apply -f app-config.yaml 
         kubectl apply -f app.yaml
         kubectl wait --timeout=90s --for=condition=ready pod -l app=login
-        #kubectl rollout restart deploy login-deployment
+        kubectl rollout restart deploy login-deployment
         kubectl rollout status deployment login-deployment
    
    #deploy welcome image    
