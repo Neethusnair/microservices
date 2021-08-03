@@ -82,6 +82,7 @@ jobs:
         kubectl apply -f gateway.yaml
         kubectl get svc -l=istio=ingressgateway -n istio-system
         kubectl apply -f gateway.yaml
+        kubectl apply -f dr-login.yaml
         kubectl apply -f vs-login.yaml
         kubectl apply -f vs-list.yaml
         
@@ -261,6 +262,7 @@ jobs:
         kubectl apply -f gateway.yaml
         kubectl get svc -l=istio=ingressgateway -n istio-system
         kubectl apply -f gateway.yaml
+        kubectl apply -f dr-login.yaml
         kubectl apply -f vs-login.yaml
         kubectl apply -f vs-list.yaml     
         
@@ -414,6 +416,7 @@ jobs:
         kubectl apply -f gateway.yaml
         kubectl get svc -l=istio=ingressgateway -n istio-system
         kubectl apply -f gateway.yaml
+        kubectl apply -f dr-login.yaml
         kubectl apply -f vs-login.yaml
         kubectl apply -f vs-list.yaml 
         

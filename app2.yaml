@@ -4,28 +4,23 @@ metadata:
   name: login-prod-deployment
   labels:
     app: login
-<<<<<<< HEAD
     version: v2
-=======
->>>>>>> 0a7e1d92a63f953a8d1a8b94f69fedfd76347e35
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: login
-<<<<<<< HEAD
       version: v2
   template:
     metadata:
       labels: # labels to select/identify the deployment
         app: login 
         version: v2 
-=======
   template:
     metadata:
       labels: # labels to select/identify the deployment
         app: login  
->>>>>>> 0a7e1d92a63f953a8d1a8b94f69fedfd76347e35
+        version: v2
 #       annotations: 
 #         date: "+%H:%M:%S %d/%m/%y"
     spec:     # pod spec
@@ -80,8 +75,4 @@ spec:
           valueFrom: 
             configMapKeyRef:
               name: app-configmap
-<<<<<<< HEAD
               key: list_port
-=======
-              key: list_port       
->>>>>>> 0a7e1d92a63f953a8d1a8b94f69fedfd76347e35

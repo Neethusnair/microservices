@@ -87,11 +87,11 @@ jobs:
         kubectl wait --timeout=90s --for=condition=ready pod -l app=list
         kubectl rollout status deployment list-prod-deployment
         
-   #deploy gateway and virtual services
-    - name: Deploy gateway
-      run: |-
-        kubectl apply -f gateway.yaml
-        kubectl get svc -l=istio=ingressgateway -n istio-system
-        kubectl apply -f gateway.yaml
-        kubectl apply -f vs-login.yaml
-        kubectl apply -f vs-list.yaml
+#    #deploy gateway and virtual services
+#     - name: Deploy gateway
+#       run: |-
+#         kubectl apply -f gateway.yaml
+#         kubectl get svc -l=istio=ingressgateway -n istio-system
+#         kubectl apply -f gateway.yaml
+#         kubectl apply -f vs-login.yaml
+#         kubectl apply -f vs-list.yaml
