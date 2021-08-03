@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: login-deployment
+  name: login-prod-deployment
   labels:
     app: login
-    version: v1
+    version: v2
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: login
-      version: v1
+      version: v2
   template:
     metadata:
       labels: # labels to select/identify the deployment
         app: login 
-        version: v1 
+        version: v2 
 #       annotations: 
 #         date: "+%H:%M:%S %d/%m/%y"
     spec:     # pod spec
@@ -24,7 +24,7 @@ spec:
       containers: 
       - name: login
         #image: neethusnair/login-docker:latest # image we pushed
-        image: sreyo.jfrog.io/ns-docker-dev-local/login-docker:latest # image we pushed
+        image: sreyo.jfrog.io/ns-docker-prod-local/login-docker:latest # image we pushed
         
         #imagePullPolicy: Never
         imagePullPolicy: Always
@@ -70,17 +70,4 @@ spec:
           valueFrom: 
             configMapKeyRef:
               name: app-configmap
-              key: list_port       
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: login-service
-  labels:
-    app: login
-spec:
-  selector:
-    app: login 
-  ports:
-    - port: 3000
-      targetPort: 3000
+              key: list_port

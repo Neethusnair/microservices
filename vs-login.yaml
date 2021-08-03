@@ -13,3 +13,4 @@ spec:
             host: login-service.default.svc.cluster.local
             port:
               number: 3000
+            subset: v2
