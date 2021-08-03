@@ -1,45 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: login-prod-deployment
+  name: list-prod-deployment
   labels:
-    app: login
-<<<<<<< HEAD
-    version: v2
-=======
->>>>>>> 0a7e1d92a63f953a8d1a8b94f69fedfd76347e35
+    app: list
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: login
-<<<<<<< HEAD
-      version: v2
+      app: list
   template:
     metadata:
       labels: # labels to select/identify the deployment
-        app: login 
-        version: v2 
-=======
-  template:
-    metadata:
-      labels: # labels to select/identify the deployment
-        app: login  
->>>>>>> 0a7e1d92a63f953a8d1a8b94f69fedfd76347e35
-#       annotations: 
-#         date: "+%H:%M:%S %d/%m/%y"
-    spec:     # pod spec
+        app: list
+    spec:     # pod spec                  
       imagePullSecrets:
       - name: jfrog-secret
       containers: 
-      - name: login
+      - name: list
         #image: neethusnair/login-docker:latest # image we pushed
-        image: sreyo.jfrog.io/ns-docker-prod-local/login-docker:latest # image we pushed
-        
+        image: sreyo.jfrog.io/ns-docker-prod-local/list-docker # image we pushed
         #imagePullPolicy: Never
         imagePullPolicy: Always
         ports:
-        - containerPort: 3000
+        - containerPort: 4000
         env:
         - name: MONGO_USERNAME
           valueFrom:
@@ -50,12 +34,12 @@ spec:
           valueFrom: 
             secretKeyRef:
               name: secret
-              key: mongo-root-password
+              key: mongo-root-password 
         - name: ACCESS_TOKEN
           valueFrom:
             secretKeyRef:
               name: secret
-              key: auth-token      
+              key: auth-token       
         - name: MONGO_HOSTNAME
           valueFrom: 
             configMapKeyRef:
@@ -70,18 +54,4 @@ spec:
           valueFrom: 
             configMapKeyRef:
               name: app-configmap
-              key: database_db
-        #- name: HOSTNAME
-          #valueFrom: 
-            #configMapKeyRef:
-              #name: app-configmap
-              #key: list_hostname
-        - name: PORT
-          valueFrom: 
-            configMapKeyRef:
-              name: app-configmap
-<<<<<<< HEAD
-              key: list_port
-=======
-              key: list_port       
->>>>>>> 0a7e1d92a63f953a8d1a8b94f69fedfd76347e35
+              key: database_db 

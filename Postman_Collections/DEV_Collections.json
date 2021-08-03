@@ -1,0 +1,90 @@
+{
+  "info": {
+    "_postman_id": "d206f66f-2f18-47af-be77-24953cb295fc",
+    "name": "Dev Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "dced3f61-e42c-4759-ad34-2b26c7e9b388",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "_postman_id": "673c851c-3b60-49f3-a976-94498169988c",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://nsdev.sreyo.in"
+      },
+      "response": []
+    },
+    {
+      "name": "GET Register",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "2e3f3c0e-c27a-41d3-b056-c7b23342d9e2",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "_postman_id": "50b3ec77-940d-4288-96b3-497d6a4afe88",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://nsdev.sreyo.in/register"
+      },
+      "response": []
+    },
+    {
+      "name": "GET List",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "440c841b-7736-4448-94e3-c5bde538276c",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "_postman_id": "8b998187-06e1-4710-8b52-58f2c99eb0e6",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://nsdev.sreyo.in/welcome/lists"
+      },
+      "response": []
+    }
+  ]
+}
