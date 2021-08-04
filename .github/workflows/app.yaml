@@ -467,32 +467,32 @@ jobs:
            --data '{"type":"A","name":"nsprod","content":"'${CLUSTER_IP}'","ttl":120,"priority":10,"proxied":true}'
            #--data '{"type":"A","name":"${{ github.head_ref }}","content":"'${CLUSTER_IP}'","ttl":120,"priority":10,"proxied":true}'          
 
-  Job9:
-    needs: Job8
-    name: Newman Testing for PROD
-    runs-on: ubuntu-latest    
+#   Job9:
+#     needs: Job8
+#     name: Newman Testing for PROD
+#     runs-on: ubuntu-latest    
     
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+#     steps:
+#     - name: Checkout
+#       uses: actions/checkout@v2
       
-    - name: Install node
-      uses: actions/setup-node@v1
+#     - name: Install node
+#       uses: actions/setup-node@v1
         
-    # Runs a set of commands using the runners shell      
-    - name: Install Newman
-      run: |
-        npm install -g newman
-        npm install -g newman-reporter-htmlextra
+#     # Runs a set of commands using the runners shell      
+#     - name: Install Newman
+#       run: |
+#         npm install -g newman
+#         npm install -g newman-reporter-htmlextra
      
-    - name: Make dir for test result
-      run: mkdir Results
+#     - name: Make dir for test result
+#       run: mkdir Results
         
-    - name: Run Collection  
-      run: newman run ./Postman_Collections/PROD_Collections.json
+#     - name: Run Collection  
+#       run: newman run ./Postman_Collections/PROD_Collections.json
 
-    - name: Output Run Details
-      uses: actions/upload-artifact@v2
-      with:
-        name: RunReports
-        path: Results 
+#     - name: Output Run Details
+#       uses: actions/upload-artifact@v2
+#       with:
+#         name: RunReports
+#         path: Results 
