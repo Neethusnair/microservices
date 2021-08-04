@@ -1,0 +1,37 @@
+name: Deploy 90% canary
+
+on:
+  workflow_dispatch
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER3: prod-gke
+  GKE_ZONE: us-central1-a
+
+jobs:
+ Job1: 
+    name: Deploy 10vs
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Setup gcloud CLI
+    - uses: google-github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+        service_account_key: ${{ secrets.GKE_SA_KEY }}
+        project_id: ${{ secrets.GKE_PROJECT }}
+
+    # Configure Docker to use the gcloud command-line tool as a credential helper for authentication
+    - run: |-
+        gcloud --quiet auth configure-docker
+    # Get the GKE credentials so we can deploy to the cluster
+    - run: |-
+        gcloud container clusters get-credentials "$GKE_CLUSTER3" --zone "$GKE_ZONE"
+        
+   #deploy 10 percent canary
+    - name: Deploy 90vs
+      run: |-
+        kubectl apply -f vs-login90.yaml
