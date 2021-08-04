@@ -1,4 +1,4 @@
-name: Deploy to Prod
+name: Deploy 10% canary
 
 on:
   workflow_dispatch
